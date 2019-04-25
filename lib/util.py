@@ -498,17 +498,17 @@ def time_difference(distance_in_time, include_seconds):
         return "over %d years" % (round(distance_in_minutes / 525600))
 
 mainnet_block_explorers = {
-    'explorer.commercium.net': ('https://explorer.commercium.net',
-                        {'tx': 'tx', 'addr': 'address'}),
+    'explorer.commercium.net': ('https://explorer.commercium.net/',
+                        {'tx': 'tx/', 'addr': 'address/'}),
     'system default': ('blockchain:',
-                        {'tx': 'tx', 'addr': 'address'})
+                        {'tx': 'tx/', 'addr': 'address/'})
 
 }
 
 
 testnet_block_explorers = {
     'system default': ('blockchain:',
-                       {'tx': 'tx', 'addr': 'address'})
+                       {'tx': 'tx/', 'addr': 'address/'})
 }
 
 def block_explorer_info():
