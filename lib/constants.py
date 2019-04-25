@@ -40,9 +40,9 @@ def read_json(filename, default):
 class BitcoinMainnet:
 
     TESTNET = False
-    WIF_PREFIX = 0x140
-    ADDRTYPE_P2PKH = [0x28]
-    ADDRTYPE_P2SH = [0x33]
+    WIF_PREFIX = 0x8C
+    ADDRTYPE_P2PKH = 0x1C
+    ADDRTYPE_P2SH = 0x33
     ADDRTYPE_SHIELDED = [0x16, 0x9A]
     SEGWIT_HRP = "bc"
     GENESIS = "00069418c278f4defdf27e431e82e35d640a6a95d9413bea1f80543c8eccb9a4"
@@ -52,7 +52,7 @@ class BitcoinMainnet:
     HEADERS_URL = "https://github.com/CommerciumBlockchain/electrum/releases/download/data/blockchain_headers"
     EQUIHASH_N = 200
     EQUIHASH_K = 9
-
+    EQUIHASH_FORK_HEIGHT = 10000000
     OVERWINTER_HEIGHT = 100
     XPRV_HEADERS = {
         'standard': 0x0488ade4,
