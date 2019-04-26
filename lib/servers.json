@@ -2,6 +2,10 @@
     "electrum.commercium.net": 
     {
     	"s":"50002"
+    },
+    "electrum2.commercium.net":
+    {
+        "s":"50002"
     }
 }
 
