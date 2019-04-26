@@ -54,6 +54,7 @@ class BitcoinMainnet:
     EQUIHASH_K = 9
     EQUIHASH_FORK_HEIGHT = 10000000
     OVERWINTER_HEIGHT = 100
+    CHUNK_SIZE = 200
     XPRV_HEADERS = {
         'standard': 0x0488ade4,
         'p2wpkh-p2sh': 0x049d7878,
