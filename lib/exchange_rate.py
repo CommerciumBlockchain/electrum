@@ -232,12 +232,10 @@ class BTCParalelo(ExchangeBase):
 
 class Coinbase(ExchangeBase):
 
-    def get_rates(self, ccy):
-        json = self.get_json('coinbase.com',
-                             '/api/v1/currencies/exchange_rates')
-        return dict([(r[7:].upper(), Decimal(json[r]))
-                     for r in json if r.startswith('btc_to_')])
-
+    async def get_rates(self, ccy):
+        json = await self.get_json('api.coinbase.com',
+                             '/v2/exchange-rates?currency=BTC')
+        return {ccy: Decimal(rate) for (ccy, rate) in json["data"]["rates"].items()}
 
 class CoinDesk(ExchangeBase):
 
@@ -369,6 +367,72 @@ class Zaif(ExchangeBase):
         json = self.get_json('api.zaif.jp', '/api/1/last_price/btc_jpy')
         return {'JPY': Decimal(json['last_price'])}
 
+
+# fetch cmm/usd exchange rate
+class CryptoBridge(ExchangeBase):
+
+    def get_rates(self, ccy):
+        cmm_btc = 0
+        pair_with_btc_json = self.get_json('api.crypto-bridge.org', '/api/v1/ticker')
+        for ticker in pair_with_btc_json:
+            if ticker['id'] == 'CMM_BTC':
+                cmm_btc = Decimal(ticker['last'])
+                break
+
+        btc_to_fiat_json = self.get_json('api.coinbase.com',
+                             '/v2/exchange-rates?currency=BTC')
+
+        result = dict([(r[7:].upper(), Decimal(btc_to_fiat_json[r]) * cmm_btc)
+                       for r in btc_to_fiat_json if r.startswith('btc_to_')])
+
+        return result
+
+    def history_ccys(self):
+        return ['USD']
+
+    def historical_rates(self, ccy):
+        json = self.get_json('coincodex.com', 'api/coincodex/get_coin_history/CMM/2019-04-01/2019-05-01/600')
+        history = json['CMM'][0]
+
+        return dict([(datetime.utcfromtimestamp(h[0]).strftime('%Y-%m-%d'), h[1])
+                     for h in history])
+
+class Crex24(ExchangeBase):
+
+    def get_rates(self, ccy):
+        pair_with_btc_json = self.get_json('api.crex24.com',
+                                           '/CryptoExchangeService/BotPublic/ReturnTicker?request=[NamePairs=BTC_CMM]')
+        cmm_btc = Decimal(pair_with_btc_json['Tickers'][0]['Last'])
+
+        btc_to_fiat_json = self.get_json('api.coinbase.com',
+                             '/v2/exchange-rates?currency=BTC')
+
+        result = dict([(r[7:].upper(), Decimal(btc_to_fiat_json[r]) * cmm_btc)
+                       for r in btc_to_fiat_json if r.startswith('btc_to_')])
+
+        return result
+
+    def history_ccys(self):
+        return ['USD']
+
+    def historical_rates(self, ccy):
+        json = self.get_json('coincodex.com', 'api/coincodex/get_coin_history/CMM/2019-04-01/2019-05-01/600')
+        history = json['CMM'][0]
+
+        return dict([(datetime.utcfromtimestamp(h[0]).strftime('%Y-%m-%d'), h[1])
+                     for h in history])
+
+class Coinodex(ExchangeBase):
+
+    def history_ccys(self):
+        return ['USD']
+
+    def historical_rates(self, ccy):
+        json = self.get_json('coincodex.com', 'api/coincodex/get_coin_history/CMM/2019-04-01/2019-05-01/600')
+        history = json['CMM'][0]
+
+        return dict([(datetime.utcfromtimestamp(h[0]).strftime('%Y-%m-%d'), h[1])
+                     for h in history])
 
 def dictinvert(d):
     inv = {}
