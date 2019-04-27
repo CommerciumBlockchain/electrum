@@ -1,7 +1,7 @@
 [app]
 
 # (str) Title of your application
-title = Commercium Electrum
+title = CMM Electrum
 
 # (str) Package name
 package.name = Electrum_CMM
@@ -31,7 +31,7 @@ source.exclude_patterns = Makefile,setup*
 version = 3.2.0
 
 # (list) Application requirements
-requirements = python3, android, openssl, plyer, kivy==b47f669f44dbda4f463bcb7d2cada639f7fed3bc, libffi, libsecp256k1
+requirements = python3, android, openssl, plyer, kivy==b47f669f44dbda4f463bcb7d2cada639f7fed3bc, libffi, libsecp256k1, pyblake2
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/gui/kivy/theming/splash.png
