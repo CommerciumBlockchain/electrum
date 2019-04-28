@@ -730,6 +730,35 @@ class Transaction:
         return pk_list, sig_list
 
     @classmethod
+    def serialize_witness(self, txin, estimate_size=False):
+        if not self.is_segwit_input(txin):
+            return '00'
+        if txin['type'] == 'coinbase':
+            return txin['witness']
+        pubkeys, sig_list = self.get_siglist(txin, estimate_size)
+        add_w = lambda x: var_int(len(x) // 2) + x
+        if txin['type'] in ['p2wpkh', 'p2wpkh-p2sh']:
+            witness = var_int(2) + add_w(sig_list[0]) + add_w(pubkeys[0])
+        elif txin['type'] in ['p2wsh', 'p2wsh-p2sh']:
+            n = len(sig_list) + 2
+            witness_script = multisig_script(pubkeys, txin['num_sig'])
+            witness = var_int(n) + '00' + ''.join(add_w(x) for x in sig_list) + add_w(witness_script)
+        else:
+            witness = txin.get('witness', None)
+            if not witness:
+                raise BaseException('wrong txin type:', txin['type'])
+        if self.is_txin_complete(txin) or estimate_size:
+            value_field = ''
+        else:
+            value_field = var_int(0xffffffff) + int_to_hex(txin['value'], 8)
+        return value_field + witness
+
+    @classmethod
+    def is_segwit_input(cls, txin):
+        has_nonzero_witness = txin.get('witness', '00') != '00'
+        return cls.is_segwit_inputtype(txin['type']) or has_nonzero_witness
+
+    @classmethod
     def input_script(self, txin, estimate_size=False):
         _type = txin['type']
         if _type == 'coinbase':
@@ -877,6 +906,9 @@ class Transaction:
             preimage = nVersion + txins + txouts + nLocktime + nHashType
         return preimage
 
+    def is_segwit(self):
+        return any(self.is_segwit_input(x) for x in self.inputs())
+
     def serialize(self, estimate_size=False):
         nVersion = int_to_hex(self.version, 4)
         nLocktime = int_to_hex(self.locktime, 4)
@@ -897,6 +929,13 @@ class Transaction:
     def hash(self):
         print("warning: deprecated tx.hash()")
         return self.txid()
+
+    def txid(self):
+        all_segwit = all(self.is_segwit_input(x) for x in self.inputs())
+        if not all_segwit and not self.is_complete():
+            return None
+        ser = self.serialize(witness=False)
+        return bh2u(Hash(bfh(ser))[::-1])
 
     def txid(self):
         if not self.is_complete():
