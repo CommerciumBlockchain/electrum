@@ -382,8 +382,8 @@ class CryptoBridge(ExchangeBase):
         btc_to_fiat_json = self.get_json('api.coinbase.com',
                              '/v2/exchange-rates?currency=BTC')
 
-        result = dict([(r[7:].upper(), Decimal(btc_to_fiat_json[r]) * cmm_btc)
-                       for r in btc_to_fiat_json if r.startswith('btc_to_')])
+        result = dict([(ccy, Decimal(rate) * cmm_btc)
+                       for (ccy, rate) in btc_to_fiat_json["data"]["rates"].items()])
 
         return result
 
@@ -407,8 +407,8 @@ class Crex24(ExchangeBase):
         btc_to_fiat_json = self.get_json('api.coinbase.com',
                              '/v2/exchange-rates?currency=BTC')
 
-        result = dict([(r[7:].upper(), Decimal(btc_to_fiat_json[r]) * cmm_btc)
-                       for r in btc_to_fiat_json if r.startswith('btc_to_')])
+        result = dict([(ccy, Decimal(rate) * cmm_btc)
+                       for (ccy, rate) in btc_to_fiat_json["data"]["rates"].items()])
 
         return result
 

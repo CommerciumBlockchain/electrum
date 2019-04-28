@@ -759,6 +759,10 @@ class Transaction:
         return cls.is_segwit_inputtype(txin['type']) or has_nonzero_witness
 
     @classmethod
+    def is_segwit_inputtype(cls, txin_type):
+        return txin_type in ('p2wpkh', 'p2wpkh-p2sh', 'p2wsh', 'p2wsh-p2sh')
+
+    @classmethod
     def input_script(self, txin, estimate_size=False):
         _type = txin['type']
         if _type == 'coinbase':
@@ -975,11 +979,18 @@ class Transaction:
         return self.virtual_size_from_weight(weight)
 
     @classmethod
-    def estimated_input_weight(cls, txin):
+    def estimated_input_weight(cls, txin, is_segwit_tx):
         '''Return an estimate of serialized input weight in weight units.'''
         script = cls.input_script(txin, True)
         input_size = len(cls.serialize_input(txin, script)) // 2
-        return 4 * input_size
+
+        if cls.is_segwit_input(txin):
+            assert is_segwit_tx
+            witness_size = len(cls.serialize_witness(txin, True)) // 2
+        else:
+            witness_size = 1 if is_segwit_tx else 0
+
+        return 4 * input_size + witness_size
 
     @classmethod
     def estimated_output_size(cls, address):
